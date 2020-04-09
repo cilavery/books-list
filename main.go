@@ -1,14 +1,14 @@
 package main
 
 import (
+	"books-list/driver"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/lib/pq"
 	"github.com/subosito/gotenv"
 	"log"
 	"net/http"
-	"os"
 )
 
 type Book struct {
@@ -32,15 +32,7 @@ func logFatal(err error) {
 }
 
 func main() {
-	pgUrl, err := pq.ParseURL(os.Getenv("ELEPHANT_SQL_URL"))
-	logFatal(err)
-
-	db, err = sql.Open("postgres", pgUrl)
-	logFatal(err)
-
-	err = db.Ping()
-	logFatal(err)
-
+	db = driver.ConnectDB()
 	r := mux.NewRouter()
 
 	r.HandleFunc("/books", getBooks).Methods("GET")
@@ -48,7 +40,7 @@ func main() {
 	r.HandleFunc("/books", addBook).Methods("POST")
 	r.HandleFunc("/books", updateBook).Methods("PUT")
 	r.HandleFunc("/books/{id}", removeBook).Methods("DELETE")
-
+	fmt.Println("Server is listening on PORT 8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
